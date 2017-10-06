@@ -1,7 +1,7 @@
 Describe 'On the system' {
     Context 'the machine name' {
         It 'should be a generated name with containing the version number and random characters' {
-            hostname | Should Match '^(cvcontainerhost.*)-\d{1,2}-\d{1,3}-\d{1,3}-.{16}$'
+            hostname | Should Match '^(cvproxyedge.*)-\d{1,2}-\d{1,3}-\d{1,3}-.{16}$'
         }
     }
 

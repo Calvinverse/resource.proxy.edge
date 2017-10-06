@@ -46,7 +46,7 @@ file '/etc/init.d/provision.sh' do
       # Generate a 16 character password
       POSTFIX=$(pwgen --no-capitalize 16 1)
 
-      NAME="cvcontainerhost-${RESOURCE_VERSION_MAJOR}-${RESOURCE_VERSION_MINOR}-${RESOURCE_VERSION_PATCH}-${POSTFIX}"
+      NAME="cvproxyedge-${RESOURCE_VERSION_MAJOR}-${RESOURCE_VERSION_MINOR}-${RESOURCE_VERSION_PATCH}-${POSTFIX}"
       sudo hostnamectl set-hostname $NAME
     }
 
