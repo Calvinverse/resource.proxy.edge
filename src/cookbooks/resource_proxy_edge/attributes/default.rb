@@ -58,8 +58,9 @@ default['fabio']['service_user'] = 'fabio'
 default['fabio']['service_group'] = 'fabio'
 
 # Installation source
-default['fabio']['release_url'] = 'https://github.com/fabiolb/fabio/releases/download/v1.5.2/fabio-1.5.2-go1.8.3-linux_amd64'
-default['fabio']['checksum'] = '62c192a306f754b8279bf21808f725a6bae6b9de2caa59af06b62542f5e718b2'
+fabio_version = '1.5.3'
+default['fabio']['release_url'] = "https://github.com/fabiolb/fabio/releases/download/v#{fabio_version}/fabio-#{fabio_version}-go1.9.2-linux_amd64"
+default['fabio']['checksum'] = 'AD352A3E770215219C57257C5DCBB14AEE83AA50DB32BA34431372B570AA58E5'
 
 #
 # FIREWALL
