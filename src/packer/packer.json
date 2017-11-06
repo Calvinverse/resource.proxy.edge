@@ -52,9 +52,9 @@
             "type": "shell"
         },
         {
-            "expect_disconnect": false,
+            "expect_disconnect": true,
             "inline": [
-                "sudo -S -E apt-get install curl"
+                "sudo -S -E apt-get install --assume-yes curl"
             ],
             "type": "shell"
         },
