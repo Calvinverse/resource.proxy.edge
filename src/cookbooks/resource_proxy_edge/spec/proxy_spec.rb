@@ -8,7 +8,7 @@ describe 'resource_proxy_edge::proxy' do
     it 'installs the fabio binaries' do
       expect(chef_run).to create_remote_file('fabio_release_binary').with(
         path: '/usr/local/bin/fabio',
-        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.3/fabio-1.5.3-go1.9.2-linux_amd64'
+        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.6/fabio-1.5.6-go1.9.2-linux_amd64'
       )
     end
 
