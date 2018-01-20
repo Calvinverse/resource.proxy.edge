@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 #
+# CONSULTEMPLATE
 #
 
+default['consul_template']['config_path'] = '/etc/consul-template.d/conf'
+default['consul_template']['template_path'] = '/etc/consul-template.d/templates'
 
 #
 # FABIO
@@ -14,6 +17,9 @@ default['fabio']['service_name'] = 'fabio'
 
 default['fabio']['service_user'] = 'fabio'
 default['fabio']['service_group'] = 'fabio'
+
+default['fabio']['consul_template_file'] = 'fabio.ctmpl'
+default['fabio']['config_file'] = 'fabio.properties'
 
 # Installation source
 fabio_version = '1.5.3'
