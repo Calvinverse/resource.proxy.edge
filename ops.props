@@ -190,6 +190,7 @@
         <!-- <DirSrc>$(DirWorkspace)\src</DirSrc> -->
         <DirSrcCookbooks>$(DirSrc)\cookbooks</DirSrcCookbooks>
         <DirSrcPacker>$(DirSrc)\packer</DirSrcPacker>
+        <DirSrcProvisioning>$(DirSrc)\provisioning</DirSrcProvisioning>
 
         <!-- The directory that contains the template files for the project -->
         <!-- <DirTemplates>$(DirWorkspace)\templates</DirTemplates> -->
@@ -562,6 +563,9 @@
         </TemplateTokens>
         <TemplateTokens Include="DirSrcCookbooksJsonEscaped">
             <ReplacementValue>$(DirBuildTempCookbooks.Replace('\', '/'))</ReplacementValue>
+        </TemplateTokens>
+        <TemplateTokens Include="DirSrcProvisioningJsonEscaped">
+            <ReplacementValue>$(DirSrcProvisioning.Replace('\', '/'))</ReplacementValue>
         </TemplateTokens>
         <TemplateTokens Include="DirVendorCookbooksJsonEscaped">
             <ReplacementValue>$(DirVendorCookbooks.Replace('\', '/'))</ReplacementValue>

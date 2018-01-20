@@ -6,6 +6,7 @@
         "dir_cookbooks_src": "src/cookbooks",
         "dir_cookbooks_vendors": "packages/vendor/cookbooks",
         "dir_http_user": null,
+        "dir_src_provisioning": "src/provisioning",
         "dir_temp": null,
         "dir_vm_import": null,
 
@@ -53,8 +54,17 @@
         },
         {
             "expect_disconnect": true,
+        {
+            "destination": "/tmp/unbound_zones.conf",
+            "source": "{{ user `dir_src_provisioning` }}/unbound_zones.conf",
+            "type": "file"
+        },
+        {
+            "expect_disconnect": false,
             "inline": [
-                "sudo -S -E apt-get install --assume-yes curl"
+                "dos2unix /tmp/unbound_zones.conf",
+                "sudo cp -a /tmp/unbound_zones.conf /etc/unbound.d/unbound_zones.conf",
+                "sudo systemctl restart unbound"
             ],
             "type": "shell"
         },
@@ -69,6 +79,14 @@
                 "resource_proxy_edge::default"
             ],
             "type": "chef-solo"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "sudo dpkg -P chef",
+                "sudo rm -rf /etc/unbound.d/unbound_zones"
+            ],
+            "type": "shell"
         }
     ]
 }
