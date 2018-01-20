@@ -54,14 +54,21 @@
             "type": "shell"
         },
         {
-            "destination": "/tmp/pester",
+            "expect_disconnect": false,
+            "inline": [
+                "echo '{{user `admin_password`}}' | sudo -S -E mkdir -m 777 /test"
+            ],
+            "type": "shell"
+        },
+        {
+            "destination": "/test/pester",
             "source": "{{ user `dir_temp` }}/tests/integration/pester",
             "type": "file"
         },
         {
             "expect_disconnect": false,
             "inline": [
-                "(/usr/lib/update-notifier/apt-check --package-names 2>&1) &>> /tmp/updates.txt"
+                "(/usr/lib/update-notifier/apt-check --package-names 2>&1) &>> /test/updates.txt"
             ],
             "type": "shell"
         },
@@ -72,14 +79,24 @@
                 "curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -",
                 "curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft.list",
                 "echo '{{user `admin_password`}}' | sudo -S -E apt-get update",
-                "echo '{{user `admin_password`}}' | sudo -S -E apt-get install --assume-yes powershell=6.0.0-beta.8-1.ubuntu.16.04"
+                "echo '{{user `admin_password`}}' | sudo -S -E apt-get install --assume-yes powershell",
+                "echo '{{user `admin_password`}}' | sudo -S -E apt-get install --assume-yes unzip"
             ],
             "type": "shell"
         },
         {
             "expect_disconnect": false,
             "inline": [
-                "echo '{{user `admin_password`}}' | sudo -S -E powershell -Command '$ErrorActionPreference = \"Stop\"; $result = Invoke-Pester -Script /tmp/pester/* -PassThru; exit $result.FailedCount '"
+                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '. /test/pester/consul/Initialize-Environment.ps1; Initialize-Environment'"
+            ],
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '$ErrorActionPreference = \"Stop\"; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted '",
+                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '$ErrorActionPreference = \"Stop\"; Install-Module Pester '",
+                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '$ErrorActionPreference = \"Stop\"; $result = Invoke-Pester -Script /test/pester/* -PassThru; exit $result.FailedCount '"
             ],
             "type": "shell"
         }
