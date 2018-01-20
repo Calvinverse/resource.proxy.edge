@@ -2,6 +2,8 @@
     "admin_username": "${LocalAdministratorName}",
     "admin_password": "${LocalAdministratorPassword}",
 
+    "cookbook_name": "${NameCookbook}",
+
     "dir_cookbooks_src": "${DirSrcCookbooksJsonEscaped}",
     "dir_cookbooks_vendors": "${DirVendorCookbooksJsonEscaped}",
     "dir_http_user": "",

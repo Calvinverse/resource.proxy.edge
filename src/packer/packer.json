@@ -3,6 +3,8 @@
         "admin_username": "admin",
         "admin_password": "admin",
 
+        "cookbook_name": "not_realy_a_cookbook_name",
+
         "dir_cookbooks_src": "src/cookbooks",
         "dir_cookbooks_vendors": "packages/vendor/cookbooks",
         "dir_http_user": null,
@@ -74,9 +76,9 @@
             ],
             "execute_command": "sudo chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
             "guest_os_type": "unix",
-            "install_command": "curl -LO https://omnitruck.chef.io/install.sh && {{if .Sudo}}sudo{{end}} bash ./install.sh -v 13.1.31 && rm install.sh",
+            "install_command": "echo \"Do nothing because chef should already be installed\"",
             "run_list": [
-                "resource_proxy_edge::default"
+                "{{ user `cookbook_name` }}::default"
             ],
             "type": "chef-solo"
         },

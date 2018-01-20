@@ -555,17 +555,21 @@
         </TemplateTokens>
 
         <!-- For the Packer config -->
+        <TemplateTokens Include="NameCookbook">
+            <ReplacementValue>$(NameCookbook)</ReplacementValue>
+        </TemplateTokens>
+
         <TemplateTokens Include="DirDeployJsonEscaped">
             <ReplacementValue>$(DirBuildDeploy.Replace('\', '/'))</ReplacementValue>
-        </TemplateTokens>
-        <TemplateTokens Include="DirTempJsonEscaped">
-            <ReplacementValue>$(DirBuildTemp.Replace('\', '/'))</ReplacementValue>
         </TemplateTokens>
         <TemplateTokens Include="DirSrcCookbooksJsonEscaped">
             <ReplacementValue>$(DirBuildTempCookbooks.Replace('\', '/'))</ReplacementValue>
         </TemplateTokens>
         <TemplateTokens Include="DirSrcProvisioningJsonEscaped">
             <ReplacementValue>$(DirSrcProvisioning.Replace('\', '/'))</ReplacementValue>
+        </TemplateTokens>
+        <TemplateTokens Include="DirTempJsonEscaped">
+            <ReplacementValue>$(DirBuildTemp.Replace('\', '/'))</ReplacementValue>
         </TemplateTokens>
         <TemplateTokens Include="DirVendorCookbooksJsonEscaped">
             <ReplacementValue>$(DirVendorCookbooks.Replace('\', '/'))</ReplacementValue>
