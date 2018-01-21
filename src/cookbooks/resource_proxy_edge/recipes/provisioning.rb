@@ -22,5 +22,3 @@ file '/etc/init.d/provision_image.sh' do
   BASH
   mode '755'
 end
-
-
