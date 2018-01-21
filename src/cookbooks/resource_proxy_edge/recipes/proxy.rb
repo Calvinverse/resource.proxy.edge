@@ -205,7 +205,7 @@ end
 consul_template_config_path = node['consul_template']['config_path']
 consul_template_template_path = node['consul_template']['template_path']
 
-# region.hcl
+# fabio.properties
 fabio_template_file = node['fabio']['consul_template_file']
 file "#{consul_template_template_path}/#{fabio_template_file}" do
   action :create
@@ -339,7 +339,7 @@ file "#{consul_template_template_path}/#{fabio_template_file}" do
     # metrics.statsd.addr configures the host:port of the StatsD
     # server. This is required when ${metrics.target} is set to "statsd".
     #
-    metrics.statsd.addr = {{ keyOrDefault "config/services/metrics/protocols/statsd/host" "unknown" }}.service.{{ keyOrDefault "config/services/consul/domain" "consul" }}:{{ keyOrDefault "config/services/metrics/protocols/statsd/port" "80" }}
+    metrics.statsd.addr = [[ keyOrDefault "config/services/metrics/protocols/statsd/host" "unknown" ]].service.[[ keyOrDefault "config/services/consul/domain" "consul" ]]:[[ keyOrDefault "config/services/metrics/protocols/statsd/port" "80" ]]
 
     # ui.access configures the access mode for the UI.
     #
@@ -357,11 +357,11 @@ file "#{consul_template_template_path}/#{fabio_template_file}" do
     # ui.color configures the background color of the UI.
     # Color names are from http://materializecss.com/color.html
     #
-    ui.color = {{ keyOrDefault "config/services/proxy.edge/ui/color" "light-blue"}}
+    ui.color = [[ keyOrDefault "config/services/proxy.edge/ui/color" "light-blue" ]]
 
     # ui.title configures an optional title for the UI.
     #
-    ui.title = {{ keyOrDefault "config/services/proxy.edge/ui/title" ""}}
+    ui.title = [[ keyOrDefault "config/services/proxy.edge/ui/title" "" ]]
   CONF
   mode '755'
 end
@@ -419,8 +419,8 @@ file "#{consul_template_config_path}/fabio.hcl" do
       # These are the delimiters to use in the template. The default is "{{" and
       # "}}", but for some templates, it may be easier to use a different delimiter
       # that does not conflict with the output file itself.
-      left_delimiter  = "{{"
-      right_delimiter = "}}"
+      left_delimiter  = "[["
+      right_delimiter = "]]"
 
       # This is the `minimum(:maximum)` to wait before rendering a new template to
       # disk and triggering a command, separated by a colon (`:`). If the optional
