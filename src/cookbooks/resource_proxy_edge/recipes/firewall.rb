@@ -102,4 +102,3 @@ firewall_rule 'unbound-dns-tcp' do
   direction :in
   protocol :tcp
 end
-
