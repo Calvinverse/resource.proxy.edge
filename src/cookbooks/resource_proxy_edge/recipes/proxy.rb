@@ -315,7 +315,7 @@ file "#{consul_template_template_path}/#{fabio_template_file}" do
     # metrics.target configures the backend the metrics values are
     # sent to.
     #
-    # metrics.target = statsd
+    metrics.target = statsd
 
     # metrics.prefix configures the template for the prefix of all reported metrics.
     #
@@ -339,7 +339,7 @@ file "#{consul_template_template_path}/#{fabio_template_file}" do
     # metrics.statsd.addr configures the host:port of the StatsD
     # server. This is required when ${metrics.target} is set to "statsd".
     #
-    # metrics.statsd.addr = [[ keyOrDefault "config/services/metrics/protocols/statsd/host" "unknown" ]].service.[[ keyOrDefault "config/services/consul/domain" "consul" ]]:[[ keyOrDefault "config/services/metrics/protocols/statsd/port" "80" ]]
+    metrics.statsd.addr = localhost:8125
 
     # ui.access configures the access mode for the UI.
     #
