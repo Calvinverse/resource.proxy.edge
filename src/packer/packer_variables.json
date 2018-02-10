@@ -2,9 +2,12 @@
     "admin_username": "${LocalAdministratorName}",
     "admin_password": "${LocalAdministratorPassword}",
 
+    "cookbook_name": "${NameCookbook}",
+
     "dir_cookbooks_src": "${DirSrcCookbooksJsonEscaped}",
     "dir_cookbooks_vendors": "${DirVendorCookbooksJsonEscaped}",
     "dir_http_user": "",
+    "dir_src_provisioning": "${DirSrcProvisioningJsonEscaped}",
     "dir_temp": "${DirTempJsonEscaped}",
     "dir_vm_import": "${DirTempJsonEscaped}/vm/base",
 

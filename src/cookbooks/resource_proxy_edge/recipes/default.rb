@@ -18,8 +18,7 @@ end
 
 include_recipe 'resource_proxy_edge::firewall'
 
-include_recipe 'resource_proxy_edge::consul'
 include_recipe 'resource_proxy_edge::meta'
-include_recipe 'resource_proxy_edge::network'
-include_recipe 'resource_proxy_edge::provisioning'
 include_recipe 'resource_proxy_edge::proxy'
+
+include_recipe 'resource_proxy_edge::provisioning'
