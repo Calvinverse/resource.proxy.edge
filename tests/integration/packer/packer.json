@@ -87,7 +87,7 @@
         {
             "expect_disconnect": false,
             "inline": [
-                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '. /test/pester/consul/Initialize-Environment.ps1; Initialize-Environment'"
+                "echo '{{user `admin_password`}}' | sudo -S -E pwsh -Command '. /test/pester/environment/Initialize-Environment.ps1; Initialize-Environment'"
             ],
             "type": "shell"
         },

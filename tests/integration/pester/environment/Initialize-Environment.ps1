@@ -18,8 +18,7 @@ function Initialize-Environment
 
     try
     {
-        $consulVersion = '1.0.2'
-        Start-TestConsul -consulVersion $consulVersion
+        Start-TestConsul
 
         Install-Vault -vaultVersion '0.9.1'
         Start-TestVault
@@ -27,10 +26,10 @@ function Initialize-Environment
         Write-Output "Waiting for 10 seconds for consul and vault to start ..."
         Start-Sleep -Seconds 10
 
-        Join-Cluster -consulVersion $consulVersion
+        Join-Cluster
 
         Set-VaultSecrets
-        Set-ConsulKV -consulVersion $consulVersion
+        Set-ConsulKV
 
         Write-Output "Giving consul-template 30 seconds to process the data ..."
         Start-Sleep -Seconds 30
@@ -73,7 +72,6 @@ function Join-Cluster
 {
     [CmdletBinding()]
     param(
-        [string] $consulVersion
     )
 
     $ErrorActionPreference = 'Stop'
@@ -84,13 +82,13 @@ function Join-Cluster
     $ipAddress = Get-IpAddress
     Write-Output "Joining: $($ipAddress):8351"
 
-    Start-Process -FilePath "/opt/consul/$($consulVersion)/consul" -ArgumentList "join $($ipAddress):8351"
+    Start-Process -FilePath "consul" -ArgumentList "join $($ipAddress):8351"
 
     Write-Output "Getting members for client"
-    & /opt/consul/$($consulVersion)/consul members
+    & consul members
 
     Write-Output "Getting members for server"
-    & /opt/consul/$($consulVersion)/consul members -http-addr=http://127.0.0.1:8550
+    & consul members -http-addr=http://127.0.0.1:8550
 }
 
 function Set-ConsulKV
@@ -100,27 +98,31 @@ function Set-ConsulKV
     Write-Output "Setting consul key-values ..."
 
     # Load config/services/consul
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/datacenter 'test-integration'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/domain 'integrationtest'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/datacenter 'test-integration'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/domain 'integrationtest'
 
-    # Load config/services/metrics
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/opentsdb/host 'opentsdb.metrics'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/opentsdb/port '4242'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/statsd/host 'statsd.metrics'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/statsd/port '1234'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/metrics/statsd/rules '"consul.*.*.* .measurement.measurement.field",'
+
+    # Explicitly don't provide a metrics address because that means telegraf will just send the metrics to
+    # a black hole
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/databases/system 'system'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/databases/statsd 'services'
+
+    # load config/services/proxy.edge
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/proxy.edge/metrics/statsd/rules '"fabio.*.*.* .measurement.measurement.field",'
 
     # load config/services/queue
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/http/host 'http.queue'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/http/port '15672'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/amqp/host 'amqp.queue'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/amqp/port '5672'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/http/host 'http.queue'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/http/port '15672'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/amqp/host 'amqp.queue'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/amqp/port '5672'
 
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/logs/syslog/username 'testuser'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/logs/syslog/vhost 'testlogs'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/logs/syslog/username 'testuser'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/logs/syslog/vhost 'testlogs'
 
     # Load config/services/vault
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/secrets/protocols/http/host 'secrets'
-    & /opt/consul/$($consulVersion)/consul kv put -http-addr=http://127.0.0.1:8550 config/services/secrets/protocols/http/port '8200'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/secrets/protocols/http/host 'secrets'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/secrets/protocols/http/port '8200'
 }
 
 function Set-VaultSecrets
@@ -136,18 +138,22 @@ function Start-TestConsul
 {
     [CmdletBinding()]
     param(
-        [string] $consulVersion
     )
 
     $ErrorActionPreference = 'Stop'
 
+    if (-not (Test-Path /test/consul))
+    {
+        New-Item -Path /test/consul -ItemType Directory | Out-Null
+    }
+
     Write-Output "Starting consul ..."
     $process = Start-Process `
-        -FilePath "/opt/consul/$($consulVersion)/consul" `
-        -ArgumentList "agent -config-file /test/pester/consul/server.json" `
+        -FilePath "consul" `
+        -ArgumentList "agent -config-file /test/pester/environment/consul.json" `
         -PassThru `
-        -RedirectStandardOutput /test/pester/consul/consuloutput.out `
-        -RedirectStandardError /test/pester/consul/consulerror.out
+        -RedirectStandardOutput /test/consul/output.out `
+        -RedirectStandardError /test/consul/error.out
 }
 
 function Start-TestVault
