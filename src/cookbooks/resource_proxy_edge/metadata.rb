@@ -13,6 +13,6 @@ version '${VersionSemantic}'
 
 supports 'ubuntu', '>= 16.04'
 
-depends 'consul', '= 3.0.0'
 depends 'firewall', '= 2.6.2'
+depends 'poise-service', '= 1.5.2'
 depends 'systemd', '= 2.1.3'

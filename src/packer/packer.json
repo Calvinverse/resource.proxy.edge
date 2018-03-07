@@ -3,15 +3,18 @@
         "admin_username": "admin",
         "admin_password": "admin",
 
+        "cookbook_name": "not_realy_a_cookbook_name",
+
         "dir_cookbooks_src": "src/cookbooks",
         "dir_cookbooks_vendors": "packages/vendor/cookbooks",
         "dir_http_user": null,
+        "dir_src_provisioning": "src/provisioning",
         "dir_temp": null,
         "dir_vm_import": null,
 
         "vm_import_directory": null,
         "vm_name": "not_really_a_vm_name",
-        "vm_ram_size_in_mb": "2048",
+        "vm_ram_size_in_mb": "1024",
         "vm_switch_name": "this_switch_does_not_exist"
     },
     "builders": [
@@ -45,16 +48,26 @@
     ],
     "provisioners": [
         {
-            "execute_command": "echo '{{ user `admin_password` }}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
-            "inline": [
-                "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-            ],
-            "type": "shell"
+            "command": "Set-VM -Name {{ user `vm_name` }} -AutomaticCheckpointsEnabled $false",
+            "execute_command": ["Powershell.exe", "-NonInteractive", "-NoLogo", "-NoProfile", "-Command", "{{.Command}}"],
+            "type": "shell-local"
         },
         {
-            "expect_disconnect": true,
+            "command": "Get-VMSnapshot -VMName {{ user `vm_name` }} | Remove-VMSnapshot",
+            "execute_command": ["Powershell.exe", "-NonInteractive", "-NoLogo", "-NoProfile", "-Command", "{{.Command}}"],
+            "type": "shell-local"
+        },
+        {
+            "destination": "/tmp/unbound_zones.conf",
+            "source": "{{ user `dir_src_provisioning` }}/unbound_zones.conf",
+            "type": "file"
+        },
+        {
+            "expect_disconnect": false,
             "inline": [
-                "sudo -S -E apt-get install --assume-yes curl"
+                "dos2unix /tmp/unbound_zones.conf",
+                "sudo cp -a /tmp/unbound_zones.conf /etc/unbound.d/unbound_zones.conf",
+                "sudo systemctl restart unbound"
             ],
             "type": "shell"
         },
@@ -64,11 +77,19 @@
             ],
             "execute_command": "sudo chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
             "guest_os_type": "unix",
-            "install_command": "curl -LO https://omnitruck.chef.io/install.sh && {{if .Sudo}}sudo{{end}} bash ./install.sh -v 13.1.31 && rm install.sh",
+            "install_command": "echo \"Do nothing because chef should already be installed\"",
             "run_list": [
-                "resource_proxy_edge::default"
+                "{{ user `cookbook_name` }}::default"
             ],
             "type": "chef-solo"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "sudo dpkg -P chef",
+                "sudo rm -rf /etc/unbound.d/unbound_zones"
+            ],
+            "type": "shell"
         }
     ]
 }

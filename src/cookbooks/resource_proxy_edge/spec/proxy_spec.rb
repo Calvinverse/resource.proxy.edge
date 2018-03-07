@@ -8,7 +8,7 @@ describe 'resource_proxy_edge::proxy' do
     it 'installs the fabio binaries' do
       expect(chef_run).to create_remote_file('fabio_release_binary').with(
         path: '/usr/local/bin/fabio',
-        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.3/fabio-1.5.3-go1.9.2-linux_amd64'
+        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.8/fabio-1.5.8-go1.10-linux_amd64'
       )
     end
 
@@ -22,8 +22,8 @@ describe 'resource_proxy_edge::proxy' do
       )
     end
 
-    it 'disables the fabio service' do
-      expect(chef_run).to disable_service('fabio')
+    it 'enables the fabio service' do
+      expect(chef_run).to enable_service('fabio')
     end
   end
 
@@ -163,6 +163,239 @@ describe 'resource_proxy_edge::proxy' do
         dest_port: 9998,
         direction: :in
       )
+    end
+  end
+
+  context 'adds the consul-template files for nomad' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+
+    fabio_properties_template_content = <<~CONF
+      # proxy.addr configures listeners.
+      #
+      proxy.addr = :7080
+
+      # proxy.strategy configures the load balancing strategy.
+      #
+      proxy.strategy = rnd
+
+      # proxy.matcher configures the path matching algorithm.
+      #
+      proxy.matcher = prefix
+
+      # proxy.noroutestatus configures the response code when no route was found.
+      #
+      proxy.noroutestatus = 404
+
+      # proxy.shutdownwait configures the time for a graceful shutdown.
+      #
+      proxy.shutdownwait = 0s
+
+      # proxy.responseheadertimeout configures the response header timeout.
+      #
+      proxy.responseheadertimeout = 0s
+
+      # proxy.keepalivetimeout configures the keep-alive timeout.
+      #
+      proxy.keepalivetimeout = 5s
+
+      # log.access.format configures the format of the access log.
+      #
+      log.access.format = common
+
+      # registry.backend configures which backend is used.
+      #
+      registry.backend = consul
+
+      # log.level configures the log level.
+      #
+      log.level = INFO
+
+      # registry.timeout configures how long fabio tries to connect to the registry
+      # backend during startup.
+      #
+      registry.timeout = 10s
+
+      # registry.retry configures the interval with which fabio tries to
+      # connect to the registry during startup.
+      #
+      registry.retry = 500ms
+
+      # registry.file.noroutehtmlpath configures the KV path for the HTML of the
+      # noroutes page.
+      #
+      registry.file.noroutehtmlpath = /config/services/proxy.edge/pages/noroutes.html
+
+      # registry.consul.addr configures the address of the consul agent to connect to.
+      #
+      registry.consul.addr = localhost:8500
+
+      # registry.consul.token configures the acl token for consul.
+      #
+      # The default is
+      #
+      # registry.consul.token =
+
+      # registry.consul.kvpath configures the KV path for manual routes.
+      #
+      registry.consul.kvpath = /config/services/proxy.edge/routes
+
+      # registry.consul.service.status configures the valid service status
+      # values for services included in the routing table.
+      #
+      registry.consul.service.status = passing
+
+      # registry.consul.tagprefix configures the prefix for tags which define routes.
+      #
+      registry.consul.tagprefix = edgeproxyprefix-
+
+      # registry.consul.register.enabled configures whether fabio registers itself in consul.
+      #
+      registry.consul.register.enabled = true
+
+      # registry.consul.register.addr configures the address for the service registration.
+      #
+      registry.consul.register.addr = :9998
+
+      # registry.consul.register.name configures the name for the service registration.
+      #
+      registry.consul.register.name = proxy
+
+      # registry.consul.register.tags configures the tags for the service registration.
+      #
+      registry.consul.register.tags = edge, edge-incoming, incoming
+
+      # registry.consul.register.checkInterval configures the interval for the health check.
+      #
+      registry.consul.register.checkInterval = 10s
+
+      # registry.consul.register.checkTimeout configures the timeout for the health check.
+      #
+      registry.consul.register.checkTimeout = 3s
+
+      # metrics.target configures the backend the metrics values are
+      # sent to.
+      #
+      metrics.target = statsd
+
+      # metrics.prefix configures the template for the prefix of all reported metrics.
+      #
+      # metrics.prefix = fabio.{{clean .Hostname}}
+
+      # metrics.names configures the template for the route metric names.
+      # The value is expanded by the text/template package and provides
+      # the following variables:
+      #
+      #  - Service:   the service name
+      #  - Host:      the host part of the URL prefix
+      #  - Path:      the path part of the URL prefix
+      #  - TargetURL: the URL of the target
+      #
+      # The following additional functions are defined:
+      #
+      #  - clean:     lowercase value and replace '.' and ':' with '_'
+      #
+      # metrics.names = {{clean .Service}}.{{clean .Host}}.{{clean .Path}}.{{clean .TargetURL.Host}}
+
+      # metrics.statsd.addr configures the host:port of the StatsD
+      # server. This is required when ${metrics.target} is set to "statsd".
+      #
+      metrics.statsd.addr = localhost:8125
+
+      # ui.access configures the access mode for the UI.
+      #
+      ui.access = ro
+
+      # ui.addr configures the address the UI is listening on.
+      # The listener uses the same syntax as proxy.addr but
+      # supports only a single listener. To enable HTTPS
+      # configure a certificate source. You should use
+      # a different certificate source than the one you
+      # use for the external connections, e.g. 'cs=ui'.
+      #
+      ui.addr = :9998
+
+      # ui.color configures the background color of the UI.
+      # Color names are from http://materializecss.com/color.html
+      #
+      ui.color = [[ keyOrDefault "config/services/proxy.edge/ui/color" "light-blue" ]]
+
+      # ui.title configures an optional title for the UI.
+      #
+      ui.title = [[ keyOrDefault "config/services/proxy.edge/ui/title" "" ]]
+    CONF
+    it 'creates nomad metrics template file in the consul-template template directory' do
+      expect(chef_run).to create_file('/etc/consul-template.d/templates/fabio.ctmpl')
+        .with_content(fabio_properties_template_content)
+    end
+
+    consul_template_fabio_properties_content = <<~CONF
+      # This block defines the configuration for a template. Unlike other blocks,
+      # this block may be specified multiple times to configure multiple templates.
+      # It is also possible to configure templates via the CLI directly.
+      template {
+        # This is the source file on disk to use as the input template. This is often
+        # called the "Consul Template template". This option is required if not using
+        # the `contents` option.
+        source = "/etc/consul-template.d/templates/fabio.ctmpl"
+
+        # This is the destination path on disk where the source template will render.
+        # If the parent directories do not exist, Consul Template will attempt to
+        # create them, unless create_dest_dirs is false.
+        destination = "/etc/fabio.d/fabio.properties"
+
+        # This options tells Consul Template to create the parent directories of the
+        # destination path if they do not exist. The default value is true.
+        create_dest_dirs = false
+
+        # This is the optional command to run when the template is rendered. The
+        # command will only run if the resulting template changes. The command must
+        # return within 30s (configurable), and it must have a successful exit code.
+        # Consul Template is not a replacement for a process monitor or init system.
+        command = "systemctl restart fabio"
+
+        # This is the maximum amount of time to wait for the optional command to
+        # return. Default is 30s.
+        command_timeout = "15s"
+
+        # Exit with an error when accessing a struct or map field/key that does not
+        # exist. The default behavior will print "<no value>" when accessing a field
+        # that does not exist. It is highly recommended you set this to "true" when
+        # retrieving secrets from Vault.
+        error_on_missing_key = false
+
+        # This is the permission to render the file. If this option is left
+        # unspecified, Consul Template will attempt to match the permissions of the
+        # file that already exists at the destination path. If no file exists at that
+        # path, the permissions are 0644.
+        perms = 0755
+
+        # This option backs up the previously rendered template at the destination
+        # path before writing a new one. It keeps exactly one backup. This option is
+        # useful for preventing accidental changes to the data without having a
+        # rollback strategy.
+        backup = true
+
+        # These are the delimiters to use in the template. The default is "{{" and
+        # "}}", but for some templates, it may be easier to use a different delimiter
+        # that does not conflict with the output file itself.
+        left_delimiter  = "[["
+        right_delimiter = "]]"
+
+        # This is the `minimum(:maximum)` to wait before rendering a new template to
+        # disk and triggering a command, separated by a colon (`:`). If the optional
+        # maximum value is omitted, it is assumed to be 4x the required minimum value.
+        # This is a numeric time with a unit suffix ("5s"). There is no default value.
+        # The wait value for a template takes precedence over any globally-configured
+        # wait.
+        wait {
+          min = "2s"
+          max = "10s"
+        }
+      }
+    CONF
+    it 'creates fabio.hcl in the consul-template template directory' do
+      expect(chef_run).to create_file('/etc/consul-template.d/conf/fabio.hcl')
+        .with_content(consul_template_fabio_properties_content)
     end
   end
 end
