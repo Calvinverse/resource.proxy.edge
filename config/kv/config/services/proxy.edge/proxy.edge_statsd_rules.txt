@@ -1,0 +1,1 @@
+"fabio.* .host.measurement* service=fabio",
