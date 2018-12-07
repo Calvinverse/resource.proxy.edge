@@ -1,0 +1,3 @@
+config:
+  - key: config/services/proxy.edge/statsd/rules
+    file: proxy.edge_statsd_rules.txt

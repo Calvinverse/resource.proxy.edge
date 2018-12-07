@@ -43,18 +43,20 @@ end
 fabio_service_name = node['fabio']['service_name']
 systemd_service fabio_service_name do
   action :create
-  after %w[network-online.target]
-  description 'Fabio'
-  documentation 'https://github.com/fabiolb/fabio'
   install do
     wanted_by %w[multi-user.target]
   end
-  requires %w[network-online.target]
   service do
     exec_start "#{fabio_install_path} -cfg #{fabio_config_path}/fabio.properties"
     restart 'on-failure'
+    user fabio_user
   end
-  user fabio_user
+  unit do
+    after %w[network-online.target]
+    description 'Fabio'
+    documentation 'https://github.com/fabiolb/fabio'
+    requires %w[network-online.target]
+  end
 end
 
 service fabio_service_name do
