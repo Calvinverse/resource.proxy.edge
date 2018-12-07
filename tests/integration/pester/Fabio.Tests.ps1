@@ -19,19 +19,19 @@ Describe 'The fabio application' {
         }
 
         $expectedContent = @'
+[Service]
+ExecStart = /usr/local/bin/fabio -cfg /etc/fabio.d/fabio.properties
+Restart = on-failure
+User = fabio
+
 [Unit]
-Description=Fabio
-Requires=network-online.target
-After=network-online.target
-Documentation=https://github.com/fabiolb/fabio
+Description = Fabio
+Documentation = https://github.com/fabiolb/fabio
+Requires = network-online.target
+After = network-online.target
 
 [Install]
-WantedBy=multi-user.target
-
-[Service]
-ExecStart=/usr/local/bin/fabio -cfg /etc/fabio.d/fabio.properties
-User=fabio
-Restart=on-failure
+WantedBy = multi-user.target
 
 '@
         $serviceFileContent = Get-Content $serviceConfigurationPath | Out-String

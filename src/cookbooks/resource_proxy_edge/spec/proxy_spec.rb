@@ -8,17 +8,18 @@ describe 'resource_proxy_edge::proxy' do
     it 'installs the fabio binaries' do
       expect(chef_run).to create_remote_file('fabio_release_binary').with(
         path: '/usr/local/bin/fabio',
-        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.8/fabio-1.5.8-go1.10-linux_amd64'
+        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.9/fabio-1.5.9-go1.10.2-linux_amd64'
       )
     end
 
     it 'installs the fabio service' do
       expect(chef_run).to create_systemd_service('fabio').with(
         action: [:create],
-        after: %w[network-online.target],
-        description: 'Fabio',
-        documentation: 'https://github.com/fabiolb/fabio',
-        requires: %w[network-online.target]
+        unit_after: %w[network-online.target],
+        unit_description: 'Fabio',
+        unit_documentation: 'https://github.com/fabiolb/fabio',
+        unit_requires: %w[network-online.target],
+        service_exec_start: '/usr/local/bin/fabio -cfg /etc/fabio.d/fabio.properties'
       )
     end
 
