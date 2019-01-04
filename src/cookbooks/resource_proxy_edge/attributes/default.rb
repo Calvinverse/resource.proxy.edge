@@ -22,9 +22,9 @@ default['fabio']['consul_template_file'] = 'fabio.ctmpl'
 default['fabio']['config_file'] = 'fabio.properties'
 
 # Installation source
-fabio_version = '1.5.9'
-default['fabio']['release_url'] = "https://github.com/fabiolb/fabio/releases/download/v#{fabio_version}/fabio-#{fabio_version}-go1.10.2-linux_amd64"
-default['fabio']['checksum'] = 'bba27283a09f6473f5e9781a1a30d8fdd9b45912b6c977949fcc8fd8e0ea4763'
+fabio_version = '1.5.10'
+default['fabio']['release_url'] = "https://github.com/fabiolb/fabio/releases/download/v#{fabio_version}/fabio-#{fabio_version}-go1.11.1-linux_amd64"
+default['fabio']['checksum'] = '9d9385372ae893c494ebe609681f90f36edf0a7af7042c17237e2c2ec6abc0c2'
 
 #
 # FIREWALL
