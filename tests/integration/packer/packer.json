@@ -18,7 +18,7 @@
         {
             "boot_wait": "30s",
             "boot_command": [],
-            "clone_from_vmxc_path": "{{ user `dir_temp` }}/{{ user `vm_name` }}/resource",
+            "clone_from_vmcx_path": "{{ user `dir_temp` }}/{{ user `vm_name` }}/resource",
             "communicator": "ssh",
             "enable_dynamic_memory": false,
             "enable_mac_spoofing": false,
@@ -67,7 +67,7 @@
             "type": "shell"
         },
         {
-            "destination": "/test/pester",
+            "destination": "/test/pester/",
             "source": "{{ user `dir_temp` }}/tests/integration/pester",
             "type": "file"
         },
@@ -81,6 +81,7 @@
         {
             "expect_disconnect": false,
             "inline": [
+                "echo '{{user `admin_password`}}' | sudo -S -E apt-get update",
                 "echo '{{user `admin_password`}}' | sudo -S -E apt install --assume-yes curl",
                 "curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -",
                 "curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft.list",
