@@ -8,7 +8,7 @@ describe 'resource_proxy_edge::proxy' do
     it 'installs the fabio binaries' do
       expect(chef_run).to create_remote_file('fabio_release_binary').with(
         path: '/usr/local/bin/fabio',
-        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.10/fabio-1.5.10-go1.11.1-linux_amd64'
+        source: 'https://github.com/fabiolb/fabio/releases/download/v1.5.12/fabio-1.5.12-go1.13.1-linux_amd64'
       )
     end
 
@@ -167,7 +167,7 @@ describe 'resource_proxy_edge::proxy' do
     end
   end
 
-  context 'adds the consul-template files for nomad' do
+  context 'adds the consul-template files for fabio' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
     fabio_properties_template_content = <<~CONF
@@ -201,15 +201,73 @@ describe 'resource_proxy_edge::proxy' do
 
       # log.access.format configures the format of the access log.
       #
-      log.access.format = common
+      # If the value is either 'common' or 'combined' then the logs are written in
+      # the Common Log Format or the Combined Log Format as defined below:
+      #
+      # 'common':   $remote_host - - [$time_common] "$request" $response_status $response_body_size
+      # 'combined': $remote_host - - [$time_common] "$request" $response_status $response_body_size "$header.Referer" "$header.User-Agent"
+      #
+      # Otherwise, the value is interpreted as a custom log format which is defined
+      # with the following parameters. Providing an empty format when logging is
+      # enabled is an error. To disable access logging leave the log.access.target
+      # value empty.
+      #
+      #   $header.<name>           - request http header (name: [a-zA-Z0-9-]+)
+      #   $remote_addr             - host:port of remote client
+      #   $remote_host             - host of remote client
+      #   $remote_port             - port of remote client
+      #   $request                 - request <method> <uri> <proto>
+      #   $request_args            - request query parameters
+      #   $request_host            - request host header (aka server name)
+      #   $request_method          - request method
+      #   $request_scheme          - request scheme
+      #   $request_uri             - request URI
+      #   $request_url             - request URL
+      #   $request_proto           - request protocol
+      #   $response_body_size      - response body size in bytes
+      #   $response_status         - response status code
+      #   $response_time_ms        - response time in S.sss format
+      #   $response_time_us        - response time in S.ssssss format
+      #   $response_time_ns        - response time in S.sssssssss format
+      #   $time_rfc3339            - log timestamp in YYYY-MM-DDTHH:MM:SSZ format
+      #   $time_rfc3339_ms         - log timestamp in YYYY-MM-DDTHH:MM:SS.sssZ format
+      #   $time_rfc3339_us         - log timestamp in YYYY-MM-DDTHH:MM:SS.ssssssZ format
+      #   $time_rfc3339_ns         - log timestamp in YYYY-MM-DDTHH:MM:SS.sssssssssZ format
+      #   $time_unix_ms            - log timestamp in unix epoch ms
+      #   $time_unix_us            - log timestamp in unix epoch us
+      #   $time_unix_ns            - log timestamp in unix epoch ns
+      #   $time_common             - log timestamp in DD/MMM/YYYY:HH:MM:SS -ZZZZ
+      #   $upstream_addr           - host:port of upstream server
+      #   $upstream_host           - host of upstream server
+      #   $upstream_port           - port of upstream server
+      #   $upstream_request_scheme - upstream request scheme
+      #   $upstream_request_uri    - upstream request URI
+      #   $upstream_request_url    - upstream request URL
+      #   $upstream_service        - name of the upstream service
+      #
+      # The default is
+      #
+      log.access.format = AL - [$time_common] - $remote_host - $upstream_addr - "$request" $response_status
+
+      # log.access.target configures where the access log is written to.
+      #
+      # Options are 'stdout'. If the value is empty no access log is written.
+      #
+      # The default is
+      #
+      log.access.target = stdout
+
+      # log.level configures the log level.
+      #
+      # Valid levels are TRACE, DEBUG, INFO, WARN, ERROR and FATAL.
+      #
+      # The default is
+      #
+      log.level = DEBUG
 
       # registry.backend configures which backend is used.
       #
       registry.backend = consul
-
-      # log.level configures the log level.
-      #
-      log.level = INFO
 
       # registry.timeout configures how long fabio tries to connect to the registry
       # backend during startup.
@@ -243,7 +301,7 @@ describe 'resource_proxy_edge::proxy' do
       # registry.consul.service.status configures the valid service status
       # values for services included in the routing table.
       #
-      registry.consul.service.status = passing
+      registry.consul.service.status = passing,warning
 
       # registry.consul.tagprefix configures the prefix for tags which define routes.
       #
@@ -272,6 +330,11 @@ describe 'resource_proxy_edge::proxy' do
       # registry.consul.register.checkTimeout configures the timeout for the health check.
       #
       registry.consul.register.checkTimeout = 3s
+
+      # registry.consul.checksRequired configures how many health checks
+      # must pass in order for fabio to consider a service available.
+      #
+      registry.consul.checksRequired = all
 
       # metrics.target configures the backend the metrics values are
       # sent to.
@@ -324,7 +387,7 @@ describe 'resource_proxy_edge::proxy' do
       #
       ui.title = [[ keyOrDefault "config/services/proxy.edge/ui/title" "" ]]
     CONF
-    it 'creates nomad metrics template file in the consul-template template directory' do
+    it 'creates fabio template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/fabio.ctmpl')
         .with_content(fabio_properties_template_content)
     end
