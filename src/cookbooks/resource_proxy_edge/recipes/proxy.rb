@@ -117,14 +117,12 @@ file '/etc/ufw/before.rules.tocopy' do
 
     # ok icmp codes for INPUT
     -A ufw-before-input -p icmp --icmp-type destination-unreachable -j ACCEPT
-    -A ufw-before-input -p icmp --icmp-type source-quench -j ACCEPT
     -A ufw-before-input -p icmp --icmp-type time-exceeded -j ACCEPT
     -A ufw-before-input -p icmp --icmp-type parameter-problem -j ACCEPT
     -A ufw-before-input -p icmp --icmp-type echo-request -j ACCEPT
 
     # ok icmp code for FORWARD
     -A ufw-before-forward -p icmp --icmp-type destination-unreachable -j ACCEPT
-    -A ufw-before-forward -p icmp --icmp-type source-quench -j ACCEPT
     -A ufw-before-forward -p icmp --icmp-type time-exceeded -j ACCEPT
     -A ufw-before-forward -p icmp --icmp-type parameter-problem -j ACCEPT
     -A ufw-before-forward -p icmp --icmp-type echo-request -j ACCEPT
@@ -132,7 +130,6 @@ file '/etc/ufw/before.rules.tocopy' do
     # allow dhcp client to work
     -A ufw-before-input -p udp --sport 67 --dport 68 -j ACCEPT
 
-    #
     # ufw-not-local
     #
     -A ufw-before-input -j ufw-not-local
