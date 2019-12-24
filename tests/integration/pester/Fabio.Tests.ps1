@@ -21,7 +21,8 @@ Describe 'The fabio application' {
         $expectedContent = @'
 [Service]
 ExecStart = /usr/local/bin/fabio -cfg /etc/fabio.d/fabio.properties
-Restart = on-failure
+RestartSec = 5
+Restart = always
 User = fabio
 
 [Unit]
@@ -29,6 +30,7 @@ Description = Fabio
 Documentation = https://github.com/fabiolb/fabio
 Requires = network-online.target
 After = network-online.target
+StartLimitIntervalSec = 0
 
 [Install]
 WantedBy = multi-user.target

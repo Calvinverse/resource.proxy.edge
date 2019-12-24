@@ -10,8 +10,8 @@ describe 'resource_proxy_edge::provisioning' do
       expect(chef_run).to enable_service('provision.service')
     end
 
-    it 'creates provision_image.sh in the /etc/init.d directory' do
-      expect(chef_run).to create_file('/etc/init.d/provision_image.sh')
+    it 'creates provision_image.sh in the /etc/provision.d directory' do
+      expect(chef_run).to create_file('/etc/provision.d/provision_image.sh')
     end
   end
 end

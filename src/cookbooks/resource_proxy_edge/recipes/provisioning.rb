@@ -11,7 +11,7 @@ service 'provision.service' do
   action [:enable]
 end
 
-file '/etc/init.d/provision_image.sh' do
+file '/etc/provision.d/provision_image.sh' do
   action :create
   content <<~BASH
     #!/bin/bash
