@@ -140,5 +140,4 @@ tests have been run because Packer will in that case create a new image.
 
 The easiest way to deploy the Azure images into a cluster on Azure is to use the terraform scripts
 provided by the [Azure ingress](https://github.com/Calvinverse/infrastructure.azure.core.ingress)
-repository. Those scripts will create a Consul cluster of the suitable size and add a single instance
-of a node with the Consul UI enabled.
+repository. Those scripts will create a proxy cluster of the suitable size.
