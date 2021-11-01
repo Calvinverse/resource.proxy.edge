@@ -234,7 +234,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <VersionLinuxBaseResource>1804.4.0</VersionLinuxBaseResource>
+        <VersionLinuxBaseResource>1804.5.1</VersionLinuxBaseResource>
     </PropertyGroup>
 
 
@@ -616,7 +616,7 @@
             The full path and version to the packer command line executable. If not defined the packages directory is searched.
         -->
         <ToolsExternalPackerPath>UNDEFINED</ToolsExternalPackerPath>
-        <ToolsExternalPackerVersion>1.5.6</ToolsExternalPackerVersion>
+        <ToolsExternalPackerVersion>1.7.2</ToolsExternalPackerVersion>
     </PropertyGroup>
 
 
